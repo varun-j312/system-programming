@@ -47,7 +47,7 @@ int create_tcp_socket(const char *ip_addr, int port_num)
 key_t generate_key()
 {
 	key_t key;
-	key = ftok("/home/cguser9/may17/data/keyfile", 65);
+	key = ftok("/home/cguser9/system-prog/may17/data/keyfile", 65);
 	handle_error(key, "Error generating key");
 	return key;
 }
@@ -58,12 +58,16 @@ int create_shared_memory()
 	key_t key = generate_key(); // key to access shared memory
 	int shmid; // id of the shared memory
 	short *num_of_connections;
+	int ret; // stores return status of functions
 
 	shmid = shmget(key, 2, 0666 | IPC_CREAT); // generating the id for shared memory
 	handle_error(shmid, "Error creating shared memory");
 
 	num_of_connections = (short *) shmat(shmid, (void *) 0, 0); // storing no. of connections
 	*num_of_connections = 0; // initialsing to zero
+
+	ret = shmdt((void *) num_of_connections);
+	handle_error(ret, "Error detaching from shared memory");
 
 	return 0;
 }
